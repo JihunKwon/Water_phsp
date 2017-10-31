@@ -1,4 +1,4 @@
-#include "BGMSCEventAction.hh"
+#include "WphspEventAction.hh"
 
 #include "G4RunManager.hh"
 #include "G4Event.hh"
@@ -12,20 +12,20 @@
 #include <iostream>
 #include "G4IAEAphspWriter.hh"
 
-BGMSCEventAction::BGMSCEventAction():G4UserEventAction()
+WphspEventAction::WphspEventAction():G4UserEventAction()
 {}
 
-BGMSCEventAction::~BGMSCEventAction()
+WphspEventAction::~WphspEventAction()
 {}
 
-void BGMSCEventAction::BeginOfEventAction(const G4Event* event)
+void WphspEventAction::BeginOfEventAction(const G4Event* event)
 {
     G4IAEAphspWriter::GetInstance()->BeginOfEventAction(event);
 }
 
-void BGMSCEventAction::EndOfEventAction(const G4Event* event)
+void WphspEventAction::EndOfEventAction(const G4Event* event)
 {
-    if (event->GetEventID()%100000 == 0)
+    if (event->GetEventID()%1000000 == 0)
         G4cout << "Event #" << event->GetEventID() << G4endl;
 }
 

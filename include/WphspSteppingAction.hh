@@ -1,5 +1,5 @@
-#ifndef BGMSCSTEPPINGACTION_H
-#define BGMSCSTEPPINGACTION_H
+#ifndef WPHSPSTEPPINGACTION_H
+#define WPHSPSTEPPINGACTION_H
 
 #include "G4UserSteppingAction.hh"
 
@@ -8,13 +8,13 @@
 
 class PrimaryGeneratorAction;
 
-class BGMSCSteppingAction : public G4UserSteppingAction {
+class WphspSteppingAction : public G4UserSteppingAction {
 
 public:
-    BGMSCSteppingAction()
+    WphspSteppingAction()
     {}
 
-    ~BGMSCSteppingAction()
+    ~WphspSteppingAction()
     {}
 
     void UserSteppingAction(const G4Step* aStep);

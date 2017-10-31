@@ -84,7 +84,8 @@ G4IAEAphspWriter * G4IAEAphspWriter::GetInstance()
 #include <vector>
 #include <math.h>
 
-
+#define WRITER_LENGTH (10.*cm) // Half length of the phantom
+#define READER_LENGTH (50.*um) // Half length of the 100*um
 
 G4IAEAphspWriter::G4IAEAphspWriter()
 {
@@ -93,6 +94,13 @@ G4IAEAphspWriter::G4IAEAphspWriter()
     theIncrNumberVector = new std::vector<G4int>;
     thePassingTracksVector = new std::vector< std::set<G4int>* >;
     theFilesAlreadyOpen = 0;
+
+    for (int i=0; i<2500; i++){
+        EENERGY[i] = {0};
+    }
+    for (int i=0; i<2500; i++){
+        XENERGY[i] = {0};
+    }
 }
 
 
@@ -114,14 +122,14 @@ void G4IAEAphspWriter::SetZStop(G4double zstop)
            << " mm." << G4endl;
 }
 
-/*
-void G4IAEAphspWriter::SetRadius(G4double R)
-{
-    theRStopVector->push_back(R);
-    G4cout << "Registered phase-space plane R = " << R/mm
-           << " mm." << G4endl;
-}
-*/
+/// R: For Spherical Phase Space
+//void G4IAEAphspWriter::SetRadius(G4double R)
+//{
+//    theRStopVector->push_back(R);
+//    G4cout << "Registered phase-space plane R = " << R/mm
+//           << " mm." << G4endl;
+//}
+
 
 
 //=============================================================
@@ -263,6 +271,38 @@ void G4IAEAphspWriter::UserSteppingAction(const G4Step* aStep)
   G4int i = 0;
   G4int size = theZStopVector->size();
   G4double zStop = (*theZStopVector)[i];
+
+  if (aStep->GetTrack()->GetVolume()->GetName() == "PlatePhys")
+  {
+      if ((aStep->IsLastStepInVolume()) &&
+          (aStep->GetTrack()->GetParticleDefinition()->GetParticleName() == "e-"))
+      {
+          G4double eEnergy = aStep->GetPostStepPoint()->GetKineticEnergy()/keV;
+          for (G4int j=0; j<2500; j++)
+          {
+              if ((0.1*j<eEnergy) && (eEnergy < 0.1*(j+1)))
+              {
+                  EENERGY[j] = EENERGY[j] + 1;
+                  break;
+              }
+          }
+      }
+
+      if ((aStep->IsLastStepInVolume()) &&
+          (aStep->GetTrack()->GetParticleDefinition()->GetParticleName() == "gamma"))
+      {
+          G4double xEnergy = aStep->GetPostStepPoint()->GetKineticEnergy()/keV;
+          for (G4int j=0; j<2500; j++)
+          {
+              if ((0.1*j<xEnergy) && (xEnergy < 0.1*(j+1)))
+              {
+                  XENERGY[j] = XENERGY[j] + 1;
+                  break;
+              }
+          }
+      }
+  }
+
   while (postZ >= zStop && i < size)
     {
       if (preZ < zStop)
@@ -308,10 +348,11 @@ void G4IAEAphspWriter::StoreIAEAParticle(const G4Step* aStep, const G4int StopId
     G4double preZ = preR.z();
 
     // Position
-    G4double postX = postR.x()/10e6;
-    G4double preX = preR.x()/10e6;
-    G4double postY = postR.y()/10e6;
-    G4double preY = preR.y()/10e6;
+    G4double Conversion=WRITER_LENGTH/READER_LENGTH;
+    G4double postX = postR.x()/Conversion;
+    G4double preX = preR.x()/Conversion;
+    G4double postY = postR.y()/Conversion;
+    G4double preY = preR.y()/Conversion;
 
     // Calculates the points on the surface
     IAEA_Float x = static_cast<IAEA_Float>( (preX+(postX-preX)*(ZStop-preZ)/(postZ-preZ))/cm );
@@ -320,9 +361,16 @@ void G4IAEAphspWriter::StoreIAEAParticle(const G4Step* aStep, const G4int StopId
 
     // Momentum direction
     G4ThreeVector momDir = aStep->GetPreStepPoint()->GetMomentumDirection();
-    IAEA_Float u = static_cast<IAEA_Float>(0);
-    IAEA_Float v = static_cast<IAEA_Float>(0);
-    IAEA_Float w = static_cast<IAEA_Float>(1);
+
+    // x,y,z direction
+    IAEA_Float u = static_cast<IAEA_Float>(momDir.x());
+    IAEA_Float v = static_cast<IAEA_Float>(momDir.y());
+    IAEA_Float w = static_cast<IAEA_Float>(momDir.z());
+
+    // kill x and y direction. only z is left
+//    IAEA_Float u = static_cast<IAEA_Float>(0);
+//    IAEA_Float v = static_cast<IAEA_Float>(0);
+//    IAEA_Float w = static_cast<IAEA_Float>(1);
 
     // Track weight
     IAEA_Float wt = static_cast<IAEA_Float>(aTrack->GetWeight()*momDir.z());
@@ -417,4 +465,16 @@ void G4IAEAphspWriter::EndOfRunAction(const G4Run* )
         delete (*is);
 
     thePassingTracksVector->clear();
+
+    std::ofstream WriteEEnergy("Electron_Edist.txt");
+    for(int k=0; k<2500; k++)
+    {
+        WriteEEnergy << k << " " << EENERGY[k] << "\n";
+    }
+
+    std::ofstream WriteXEnergy("Gamma_Edist.txt");
+    for(int k=0; k< 2500; k++)
+    {
+        WriteXEnergy << k << " " << XENERGY[k] << "\n";
+    }
 }

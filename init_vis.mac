@@ -1,3 +1,8 @@
+
+/run/initialize
+
+/control/verbose 2
+
 /vis/open OGLSQt
 
 /vis/drawVolume

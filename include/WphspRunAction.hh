@@ -1,17 +1,17 @@
-#ifndef BGMSCRUNACTION_H
-#define BGMSCRUNACTION_H
+#ifndef WPHSPRUNACTION_H
+#define WPHSPRUNACTION_H
 
 #include "G4UserRunAction.hh"
-#include "BGMSCDetectorConstruction.hh"
+#include "WphspDetectorConstruction.hh"
 #include "globals.hh"
 #include <vector>
 
-class BGMSCRunAction : public G4UserRunAction
+class WphspRunAction : public G4UserRunAction
 {
 public:
 
-    BGMSCRunAction();
-    virtual ~BGMSCRunAction();
+    WphspRunAction();
+    virtual ~WphspRunAction();
 
     virtual void BeginOfRunAction(const G4Run*);
     virtual void EndOfRunAction(const G4Run*);

@@ -1,4 +1,4 @@
-#include "BGMSCSteppingAction.hh"
+#include "WphspSteppingAction.hh"
 
 #include "G4Track.hh"
 #include "G4TrackStatus.hh"
@@ -7,7 +7,7 @@
 #include "G4VProcess.hh"
 #include "G4IAEAphspWriter.hh"
 
-void BGMSCSteppingAction::UserSteppingAction(const G4Step* aStep)
+void WphspSteppingAction::UserSteppingAction(const G4Step* aStep)
 {
 
 //    if (!aStep->GetTrack()->GetCreatorProcess()&&aStep->IsFirstStepInVolume())

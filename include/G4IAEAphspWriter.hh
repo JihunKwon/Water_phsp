@@ -150,6 +150,9 @@ private: // DATA MEMBERS
   G4ThreeVector postZ;
   G4double zstop;
 
+  G4int EENERGY[2500];
+  G4int XENERGY[2500];
+
 };
 
 #endif

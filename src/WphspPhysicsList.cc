@@ -1,4 +1,4 @@
-#include "BGMSCPhysicsList.hh"
+#include "WphspPhysicsList.hh"
 
 // Physic lists (contained inside the Geant4 source code, in the 'physicslists folder')
 #include "G4HadronPhysicsQGSP_BIC.hh"
@@ -30,15 +30,21 @@
 #include "G4EmPenelopePhysics.hh"
 #include "G4StepLimiterPhysics.hh"
 
+#include "G4UAtomicDeexcitation.hh"
+
+#include "StepMax.hh"
+
 using namespace CLHEP;
 
-BGMSCPhysicsList::BGMSCPhysicsList() : G4VModularPhysicsList()
+WphspPhysicsList::WphspPhysicsList() : G4VModularPhysicsList()
 {
   G4LossTableManager::Instance();
-  defaultCutValue = 0.1*nm;
+  defaultCutValue = 10*cm; //0.1*nm This doesn't work
   cutForGamma     = defaultCutValue;
   cutForElectron  = defaultCutValue;
   cutForPositron  = defaultCutValue;
+
+  stepMaxProcess  = 0;
 
   G4EmParameters* emParameters = G4EmParameters::Instance();
   emParameters->SetMinEnergy(0*eV);
@@ -69,22 +75,53 @@ BGMSCPhysicsList::BGMSCPhysicsList() : G4VModularPhysicsList()
   RegisterPhysics(new G4NeutronTrackingCut);
 }
 
-BGMSCPhysicsList::~BGMSCPhysicsList()
+WphspPhysicsList::~WphspPhysicsList()
 {}
 
-void BGMSCPhysicsList::ConstructProcess()
+void WphspPhysicsList::ConstructProcess()
 {
     G4VModularPhysicsList::ConstructProcess();
+
+    //Deexcitation
+    G4VAtomDeexcitation* de = new G4UAtomicDeexcitation();
+    de->SetFluo(true);
+    de->SetAuger(true);
+    de->SetPIXE(true);
+    de->SetAugerCascade(true);
+    G4LossTableManager::Instance()->SetAtomDeexcitation(de);
+
+    // step limitation (as a full process)
+    //
+    AddStepMax();
 }
 
 //void PhysicsLists::AddP
 
-void BGMSCPhysicsList::SetCuts()
+void WphspPhysicsList::SetCuts()
 {
  // set cut values for gamma at first and for e- second and next for e+,
  // because some processes for e+/e- need cut values for gamma
     SetCutValue(cutForGamma, "gamma");
     SetCutValue(cutForElectron, "e-");
     SetCutValue(cutForPositron, "e+");
+
+    G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(250*eV, 1*GeV);
 }
 
+void WphspPhysicsList::AddStepMax()
+{
+    // Step limitation seen as a process
+    stepMaxProcess = new StepMax();
+
+    auto theParticleIterator=GetParticleIterator();
+    theParticleIterator->reset();
+    while ((*theParticleIterator)()){
+        G4ParticleDefinition* particle = theParticleIterator->value();
+        G4ProcessManager* pmanager = particle->GetProcessManager();
+
+        if (stepMaxProcess->IsApplicable(*particle) && pmanager)
+        {
+            pmanager->AddDiscreteProcess(stepMaxProcess);
+        }
+    }
+}

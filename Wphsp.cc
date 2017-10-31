@@ -1,4 +1,4 @@
-#undef G4MULTITHREADED
+#undef G4MULTITHREADED // IAEA Phase Space seems to be not support MT.
 
 #undef G4VIS_USE
 
@@ -20,16 +20,19 @@
 #include "G4UIExecutive.hh"
 #endif
 
-#include "BGMSCPhysicsList.hh"
-#include "BGMSCDetectorConstruction.hh"
-#include "BGMSCPrimaryGeneratorAction.hh"
-#include "BGMSCEventAction.hh"
-#include "BGMSCRunAction.hh"
-#include "BGMSCActionInitialization.hh"
+#include "WphspPhysicsList.hh"
+#include "WphspDetectorConstruction.hh"
+#include "WphspPrimaryGeneratorAction.hh"
+#include "WphspEventAction.hh"
+#include "WphspRunAction.hh"
+#include "WphspActionInitialization.hh"
 
 #include "G4CsvAnalysisManager.hh"
 #include "G4IAEAphspWriter.hh"
 
+#include "G4ScoringManager.hh"
+
+#include "G4CsvAnalysisManager.hh"
 #include <math.h>
 
 static G4double Sigma;
@@ -46,18 +49,19 @@ int main(int argc,char** argv)
     runManager->SetNumberOfThreads(8);
 #else
     G4RunManager* runManager = new G4RunManager;
+    G4ScoringManager* scoringManager = G4ScoringManager::GetScoringManager();
 #endif
 
-    BGMSCDetectorConstruction* massWorld = new BGMSCDetectorConstruction;
+    WphspDetectorConstruction* massWorld = new WphspDetectorConstruction;
     runManager->SetUserInitialization(massWorld);
 
-    G4VModularPhysicsList* physicsList = new BGMSCPhysicsList;
+    G4VModularPhysicsList* physicsList = new WphspPhysicsList;
     physicsList->SetVerboseLevel(0);
     runManager->SetUserInitialization(physicsList);
 
-    BGMSCActionInitialization* actionInit = new BGMSCActionInitialization(massWorld);
+    WphspActionInitialization* actionInit = new WphspActionInitialization(massWorld);
     runManager->SetUserInitialization(actionInit);
-    runManager->Initialize();
+    runManager->Initialize(); //Comment for Batch mode
 
     G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
@@ -71,7 +75,21 @@ int main(int argc,char** argv)
     delete visManager;
 #endif
 
-    runManager->BeamOn(20);
+    G4UImanager* pUI = G4UImanager::GetUIpointer();
+    if (argc != 1)   // batch mode
+    {
+        G4String command = "/control/execute ";
+        G4String fileName = argv[1];
+        pUI->ApplyCommand(command + fileName);
+    }
+
+    else           //define visualization and UI terminal for interactive mode
+    {
+
+    }
+
+      pUI->ApplyCommand("/testem/stepMax 1 mm"); //Comment for Batch mode
+      runManager->BeamOn(100000000);                  //Comment for Batch mode
 
     delete runManager;
     return 0;

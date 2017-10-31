@@ -1,0 +1,28 @@
+
+/run/initialize
+#
+# define scoring mesh
+#
+/score/create/boxMesh boxMesh
+/score/mesh/boxSize 100. 100. 100. mm #half width
+/score/mesh/translate/xyz 0. 0. 79.95 um
+/score/mesh/nBin 1 1 2000
+#
+# define scorers and filters
+#
+/score/quantity/energyDeposit Edep
+#
+/score/close
+#
+/testem/stepMax 10 nm
+#
+#/run/printProgress 10000
+#
+
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+/run/beamOn 10000 #30000000
+
+/score/dumpAllQuantitiesToFile boxMesh Edep.csv

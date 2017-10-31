@@ -1,22 +1,22 @@
-#ifndef BGMSCDETECTORCONSTRUCTION_H
-#define BGMSCDETECTORCONSTRUCTION_H
+#ifndef WPHSPDETECTORCONSTRUCTION_H
+#define WPHSPDETECTORCONSTRUCTION_H
 
 #include "G4VUserDetectorConstruction.hh"
 #include "G4Material.hh"
 #include "tls.hh"
 
-class BGMSCDetectorMessenger;
+class WphspDetectorMessenger;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 class G4UserLimits;
 
 using namespace CLHEP;
 
-class BGMSCDetectorConstruction : public G4VUserDetectorConstruction
+class WphspDetectorConstruction : public G4VUserDetectorConstruction
 {
 public:
-    BGMSCDetectorConstruction();
-    ~BGMSCDetectorConstruction() {}
+    WphspDetectorConstruction();
+    ~WphspDetectorConstruction() {}
 
     G4VPhysicalVolume* Construct();
 

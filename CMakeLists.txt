@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 
-PROJECT(WaterPhantom)
+PROJECT(Wphsp)
 
 FIND_PACKAGE(Geant4 REQUIRED ui_all vis_all)
 IF(NOT Geant4_FOUND)
@@ -15,16 +15,16 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 FILE(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 FILE(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
-ADD_EXECUTABLE(BGMSC BGMSC.cc ${sources} ${headers})
-TARGET_LINK_LIBRARIES(BGMSC ${Geant4_LIBRARIES})
+ADD_EXECUTABLE(Wphsp Wphsp.cc ${sources} ${headers})
+TARGET_LINK_LIBRARIES(Wphsp ${Geant4_LIBRARIES})
 
-set(BGMSC_SCRIPTS
+set(Wphsp_SCRIPTS
     init_vis.mac
-    Varian_TrueBeam6MV_01.IAEAheader
-    Varian_TrueBeam6MV_01.IAEAphsp
+    220kVp.txt
+    mesh.mac
 )
 
-foreach(_script ${BGMSC_SCRIPTS})
+foreach(_script ${Wphsp_SCRIPTS})
     configure_file(
         ${PROJECT_SOURCE_DIR}/${_script}
         ${PROJECT_BINARY_DIR}/${_script}
